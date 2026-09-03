@@ -122,15 +122,31 @@
 
 		if (music) {
 			music.volume = 0.15;
-			music.play().catch(function() {
-				var startMusic = function() {
-					music.play();
-					document.removeEventListener('pointerdown', startMusic);
-					document.removeEventListener('keydown', startMusic);
-				};
+			var savedTime = sessionStorage.getItem('backgroundMusicTime'),
+				wasPlaying = sessionStorage.getItem('backgroundMusicPlaying') === 'true';
 
+			if (savedTime) {
+				music.currentTime = parseFloat(savedTime);
+			}
+
+			var startMusic = function() {
+				music.play();
+				document.removeEventListener('pointerdown', startMusic);
+				document.removeEventListener('keydown', startMusic);
+			};
+
+			music.play().catch(function() {
 				document.addEventListener('pointerdown', startMusic, { once: true });
 				document.addEventListener('keydown', startMusic, { once: true });
+			});
+
+			if (wasPlaying) {
+				music.play().catch(function() {});
+			}
+
+			window.addEventListener('pagehide', function() {
+				sessionStorage.setItem('backgroundMusicTime', music.currentTime);
+				sessionStorage.setItem('backgroundMusicPlaying', String(!music.paused));
 			});
 		}
 
