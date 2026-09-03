@@ -117,6 +117,26 @@
 			}, 100);
 		});
 
+	// Start background music only after the visitor interacts with the page.
+		var music = document.getElementById('background-music'),
+			musicToggle = document.getElementById('music-toggle');
+
+		if (music && musicToggle) {
+			music.volume = 0.15;
+
+			musicToggle.addEventListener('click', function() {
+				if (music.paused) {
+					music.play().then(function() {
+						musicToggle.textContent = 'Pause music';
+					}).catch(function() {});
+				}
+				else {
+					music.pause();
+					musicToggle.textContent = 'Play music';
+				}
+			});
+		}
+
 	// Scrolly.
 		$('.scrolly').scrolly();
 
