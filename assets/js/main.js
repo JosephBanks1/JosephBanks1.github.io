@@ -150,6 +150,59 @@
 			});
 		}
 
+	// Switch site sections without reloading the page or interrupting music.
+		var homeContent = $main.html(),
+			tabLinks = document.querySelectorAll('#nav .links a[data-tab]'),
+			tabSources = {
+				philosophy: 'generic.html',
+				toolbox: 'elements.html'
+			};
+
+		var loadTab = function(tabName) {
+			tabLinks.forEach(function(link) {
+				link.parentElement.classList.toggle('active', link.dataset.tab === tabName);
+			});
+
+			if (tabName === 'home') {
+				$main.html(homeContent);
+				return;
+			}
+
+			if (!tabSources[tabName]) {
+				return;
+			}
+
+			fetch(tabSources[tabName])
+				.then(function(response) {
+					if (!response.ok) {
+						throw new Error('Unable to load tab content');
+					}
+					return response.text();
+				})
+				.then(function(page) {
+					var pageDocument = new DOMParser().parseFromString(page, 'text/html'),
+						pageMain = pageDocument.querySelector('#main');
+
+					if (pageMain) {
+						$main.html(pageMain.innerHTML);
+					}
+				})
+				.catch(function() {
+					$main.html('<section class="post"><h2>Content unavailable</h2><p>Please try again.</p></section>');
+				});
+		};
+
+		$('#nav .links').on('click', 'a[data-tab]', function(event) {
+			event.preventDefault();
+			window.location.hash = this.dataset.tab;
+		});
+
+		$window.on('hashchange', function() {
+			loadTab(window.location.hash.substring(1) || 'home');
+		});
+
+		loadTab(window.location.hash.substring(1) || 'home');
+
 	// Scrolly.
 		$('.scrolly').scrolly();
 
