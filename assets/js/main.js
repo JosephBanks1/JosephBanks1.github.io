@@ -192,12 +192,23 @@
 				});
 		};
 
-		$('#nav .links').on('click', 'a[data-tab]', function(event) {
+		document.addEventListener('click', function(event) {
+			var tabLink = event.target.closest('a[data-tab]');
+
+			if (!tabLink) {
+				return;
+			}
+
 			event.preventDefault();
-			window.location.hash = this.dataset.tab;
+			window.history.pushState(null, '', '#' + tabLink.dataset.tab);
+			loadTab(tabLink.dataset.tab);
 		});
 
 		$window.on('hashchange', function() {
+			loadTab(window.location.hash.substring(1) || 'home');
+		});
+
+		$window.on('popstate', function() {
 			loadTab(window.location.hash.substring(1) || 'home');
 		});
 
