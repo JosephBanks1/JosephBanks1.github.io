@@ -117,23 +117,20 @@
 			}, 100);
 		});
 
-	// Start background music only after the visitor interacts with the page.
-		var music = document.getElementById('background-music'),
-			musicToggle = document.getElementById('music-toggle');
+	// Try autoplay, then retry after the first interaction if the browser blocks it.
+		var music = document.getElementById('background-music');
 
-		if (music && musicToggle) {
+		if (music) {
 			music.volume = 0.15;
+			music.play().catch(function() {
+				var startMusic = function() {
+					music.play();
+					document.removeEventListener('pointerdown', startMusic);
+					document.removeEventListener('keydown', startMusic);
+				};
 
-			musicToggle.addEventListener('click', function() {
-				if (music.paused) {
-					music.play().then(function() {
-						musicToggle.textContent = 'Pause music';
-					}).catch(function() {});
-				}
-				else {
-					music.pause();
-					musicToggle.textContent = 'Play music';
-				}
+				document.addEventListener('pointerdown', startMusic, { once: true });
+				document.addEventListener('keydown', startMusic, { once: true });
 			});
 		}
 
